@@ -3,33 +3,31 @@
   hosts: prod
   become: true
 
-  vars:
-    ansible_sudo_pass: admin
-
   pre_tasks:
-  - name: install Epel repo
+  - name: Install some repo
     package:
-      name: epel-release
+      name: '{{ item }}'
       state: present
-    when: ansible_distribution == "CentOS"    
-    # install pip original script    
+    when: ansible_distribution == "CentOS"
+    loop:
+      - epel-release
+      - git
+      - wget
   - name: download pip script
     get_url:
       url: https://bootstrap.pypa.io/pip/2.7/get-pip.py
       dest: /tmp/get-pip.py
-  - name: install python-pip
+  - name: Install python-pip
     command: python2.7 /tmp/get-pip.py
-  # install pip via yum 
-  # - name: install python-pip
-  #   yum: name=python-pip state=present update_cache=yes
   - name: Install docker python
     pip: name=docker-py
 
   tasks:
+    - name: Copy website file template 
+      template:
+        src: index.html.j2
+        dest: /home/admin/index.html
     - name: Create Apache Container
-      # docker_container:
-      #   name: webapp
-      #   image: httpd
-      #   ports:
-      #   - "80:80"
-      docker_container: name=webapp image=httpd ports="80:80"
+      docker_container: name=webapp image=httpd ports="80:80" 
+        volumes=/home/admin/index.html:/usr/local/apache2/htdocs/index.html
+        
