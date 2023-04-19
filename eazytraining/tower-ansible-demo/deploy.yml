@@ -24,11 +24,5 @@
     pip: name=docker-py
 
   tasks:
-    - name: Copy website file template 
-      template:
-        src: index.html.j2
-        dest: /home/admin/index.html
     - name: Create Apache Container
-      docker_container: name=webapp image=httpd ports="80:80" 
-        volumes=/home/admin/index.html:/usr/local/apache2/htdocs/index.html
-        
+      docker_container: name=webapp image=httpd ports="80:80"
